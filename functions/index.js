@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
 const request = require('request');
+const buildFunctions = require('./build');
 
 admin.initializeApp(functions.config().firebase);
 
@@ -39,3 +40,9 @@ exports.humanAPITokenExchange = functions.https.onRequest((req, res) => {
         res.status(201).send(JSON.stringify(responseJSON));
       });
   });
+
+exports.buildSlackNotification = functions.https.onRequest((req, res) => {
+    console.log(`buildSlackNotification = ${JSON.stringify(req.body)}`);
+ 
+    buildFunctions.slackNotification(req,res);
+});
