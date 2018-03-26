@@ -9,7 +9,7 @@ const nodemailer = require('nodemailer');
 // 2. https://accounts.google.com/DisplayUnlockCaptcha
 // For other types of transports such as Sendgrid see https://nodemailer.com/transports/
 // TODO: Configure the `gmail.email` and `gmail.password` Google Cloud environment variables.
-const gmailEmail = "nabylb@gmail.com";
+const gmailEmail = "humantiv@citizenhealth.io";
 const gmailPassword = "fbiviacskmojbsnd";
 const mailTransport = nodemailer.createTransport({
   service: 'gmail',
