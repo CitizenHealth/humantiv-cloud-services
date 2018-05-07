@@ -1,5 +1,5 @@
 // Function setting an initial score to a new user
-const INITIAL_MEDITS = 200;
+const INITIAL_SCORE = 50;
 
 exports.setInitialHealthScore = function(event, database, callback) {
     const user = event.data; // The Firebase user.
@@ -9,7 +9,7 @@ exports.setInitialHealthScore = function(event, database, callback) {
     // Write the 
     database.ref('users/' + id + '/health')
     .set({
-        score: '50'
+        score: INITIAL_SCORE
     })
     .then(() => {
         console.log("score set successfully");

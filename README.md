@@ -49,7 +49,17 @@ Triggered by creation of a user account. Creates a baseline health score for the
 -  *Input*:User login info.
 -  *Returns*: ok
 ---
+**initializeAccount:**
+Triggered by creation of a user account. Initializes default data such as units and notifications.
+-  *Input*:User login info.
+-  *Returns*: ok
+---
 **sendMeditsNotification:**
 Triggered by the change of the medits number assigned to a user.
 -  *Input*:medits number.
+-  *Returns*: ok
+---
+**sendScoreNotification:**
+Triggered by the change of the score number assigned to a user. Only sent when score increases by a number >= 5% or decreases by a number >= 3%
+-  *Input*:score number.
 -  *Returns*: ok
