@@ -6,7 +6,7 @@ exports.meditsNotifications = function(event, admin) {
 
      // If un-follow we exit the function.
     if (meditsAmount < 0) {
-      return console.log('No medits minted');
+      return console.log('No medit minted');
     }
     console.log('We have a new medits minted:', meditsAmount, 'for user:', userId);
   
@@ -23,8 +23,8 @@ exports.meditsNotifications = function(event, admin) {
       // Notification details.
       const payload = {
         notification: {
-          title: 'You just earned new Medits!',
-          body: `You have now ${meditsAmount} medits in your wallet.`,
+          title: 'You just earned new Medit!',
+          body: `You have now ${meditsAmount} medit in your wallet.`,
           icon: 'https://firebasestorage.googleapis.com/v0/b/health-score-6740b.appspot.com/o/notification%2Fmedits.png?alt=media&token=93860fa7-8921-4b5e-80f5-be056e2be873',
         },
       };

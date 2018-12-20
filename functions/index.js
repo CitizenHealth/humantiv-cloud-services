@@ -9,8 +9,7 @@ const emailFunctions = require('./modules/email');
 const meditFunctions = require('./modules/medit');
 const healthscoreFunctions = require('./modules/healthscore');
 const notificationFunctions = require('./modules/notifications');
-
-
+const initAccountFunctions = require('./modules/account');
 
 admin.initializeApp(functions.config().firebase);
 
@@ -27,6 +26,20 @@ exports.humanAPITokenExchange = functions.https.onRequest((req, res) => {
             res.status(400);
         }
     })  
+});
+
+exports.humanAPINotification = functions.https.onRequest((req, res) => {
+
+  console.log(`humanAPINotification = ${JSON.stringify(req.body)}`);
+
+  humanFunctions.humanAPINotification(req, res, admin.database(), (success,responseJSON) => {
+      res.setHeader('Content-Type', 'application/json');
+      if (success) {
+          res.status(200).send(JSON.stringify(responseJSON));
+      } else {
+          res.status(400);
+      }
+  })  
 });
 
 // Build Notification
@@ -70,7 +83,7 @@ exports.setInitialHealthScore = functions.auth.user().onCreate((event) => {
     console.log(`setInitialHealthScore = ${JSON.stringify(event)}`);
  
     healthscoreFunctions.setInitialHealthScore(event, admin.database(), () => {
-        console.log(`Set health score of 50 to ${event.data.email}`);
+        console.log(`Set health score of 0 to ${event.data.email}`);
         return 1;
     });
 });
@@ -79,7 +92,7 @@ exports.setInitialHealthScore = functions.auth.user().onCreate((event) => {
 exports.initializeAccount = functions.auth.user().onCreate((event) => {
   console.log(`initializeAccount = ${JSON.stringify(event)}`);
 
-  initAccountFunctions.initializeAccount(event, admin.database(), () => {
+    initAccountFunctions.initializeAccount(event, admin.database(), () => {
       console.log(`Set default data to ${event.data.email}`);
       return 1;
   });
@@ -101,10 +114,13 @@ exports.sendMeditsNotification = functions.database.ref('/users/{user_id}/wallet
 exports.sendScoreNotification = functions.database.ref('/users/{user_id}/health/score').onWrite((event) => {
     const scoreAmount = event.data.val();
 
-    notificationFunctions.scoreNotifications(event, admin, (param) => {
-        console.log(`Param ${param}`);
-        console.log(`New Health Score is ${event.data.val()}`);
-        return 1;
-    });
+    // *** DISABLED FOR NOW *** 
+
+    // notificationFunctions.scoreNotifications(event, admin, (param) => {
+    //     console.log(`Param ${param}`);
+    //     console.log(`New Health Score is ${event.data.val()}`);
+    //     return 1;
+    // });
+    return 1;
   });
 

@@ -1,5 +1,6 @@
 // Webhook for Nevercode to send a Slack notification when a 
 // Humantiv app build is succesful
+const admin = require('firebase-admin');
 const request = require('request');
 
 exports.humanAPIHandshake = function(req, res, database, callback) {
@@ -36,22 +37,59 @@ exports.humanAPIHandshake = function(req, res, database, callback) {
         })
         .then(() => {
             console.log("humanapi write succeeded");
+            //Send back publicToken to app
+            var responseJSON = {
+              humanId: body.humanId,
+              accessToken: body.accessToken,
+              publicToken: body.publicToken
+            };
+            callback(true, responseJSON);
             return 1;
         })
         .catch((error) => {
             console.log(`humanapi error: ${error}`);
+            callback(false, error);
             return 0;
         });
-
-        //Send back publicToken to app
-        var responseJSON = {
-            humanId: body.humanId,
-            accessToken: body.accessToken,
-            publicToken: body.publicToken
-        };
-
 //        console.log("Response = "+ responseJSON);
-        callback(true, responseJSON);
-        return;
     });
+}
+
+exports.humanAPINotification = function(req, res, database, callback) {
+    
+  var humanApiObj = req.body[0];
+
+  // Get a database reference to our posts
+  var db = admin.database();
+  var ref = db.ref("users");
+
+  console.log(`Human Id = ${humanApiObj.humanId}`);
+
+  ref.child('users').orderByChild('humanapi').equalTo(humanApiObj.humanId).on("value", (snapshot) => {
+    console.log(snapshot.val());
+    snapshot.forEach((data) => {
+        console.log(data.key);
+    });
+  });
+
+  // ref.child("humanapi").child("height").on("value", function(stegosaurusHeightSnapshot) {
+  //   var favoriteDinoHeight = stegosaurusHeightSnapshot.val();
+  
+  //   var queryRef = ref.orderByChild("height").endAt(favoriteDinoHeight).limitToLast(2)
+  //   queryRef.on("value", function(querySnapshot) {
+  //     if (querySnapshot.numChildren() === 2) {
+  //       // Data is ordered by increasing height, so we want the first entry
+  //       querySnapshot.forEach(function(dinoSnapshot) {
+  //         console.log("The dinosaur just shorter than the stegasaurus is " + dinoSnapshot.key);
+  
+  //         // Returning true means that we will only loop through the forEach() one time
+  //         return true;
+  //       });
+  //     } else {
+  //       console.log("The stegosaurus is the shortest dino");
+  //     }
+  //   });
+  // });
+  callback(true, {});
+  return;
 }
