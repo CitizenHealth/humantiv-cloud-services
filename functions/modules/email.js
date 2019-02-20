@@ -24,7 +24,7 @@ const mailTransport = nodemailer.createTransport({
 const APP_NAME = 'Humantiv';
 
 exports.welcomeEmail = function(event, callback) {
-    const user = event.data; // The Firebase user.
+    const user = event; // The Firebase user.
 
     const email = user.email; // The email of the user.
     const displayName = user.displayName; // The display name of the user.

@@ -63,3 +63,8 @@ Triggered by the change of the medits number assigned to a user.
 Triggered by the change of the score number assigned to a user. Only sent when score increases by a number >= 5% or decreases by a number >= 3%
 -  *Input*:score number.
 -  *Returns*: ok
+---
+**calculateLeaderboard:**
+Triggered by the change of the medit number assigned to a user. It modifies the leaderboard.
+-  *Input*:medit number.
+-  *Returns*: ok

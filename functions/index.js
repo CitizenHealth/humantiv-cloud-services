@@ -10,6 +10,8 @@ const meditFunctions = require('./modules/medit');
 const healthscoreFunctions = require('./modules/healthscore');
 const notificationFunctions = require('./modules/notifications');
 const initAccountFunctions = require('./modules/account');
+const leaderboardFunctions = require('./modules/leaderboard');
+const adminAPIFunctions = require('./modules/adminapi');
 
 admin.initializeApp(functions.config().firebase);
 
@@ -100,27 +102,135 @@ exports.initializeAccount = functions.auth.user().onCreate((event) => {
 
 // Notification
 // **Medits
-exports.sendMeditsNotification = functions.database.ref('/users/{user_id}/wallet/medits').onWrite((event) => {
-    const meditsAmount = event.data.val();
+exports.sendMeditsNotification = functions.database.ref('/users/{user_id}/wallet/medits').onWrite((change, context) => {
+	let meditsAmount = 0;
+	
+	// context: {
+//   "eventType": "google.firebase.database.ref.write",
+//   "params": {
+//     "user_id": "3uJs38ucT7WKK53raqTSKXmcXf92"
+//   },
+//   "resource": {
+//     "service": "firebaseio.com",
+//     "name": "projects/_/instances/health-score-6740b/refs/users/3uJs38ucT7WKK53raqTSKXmcXf92/wallet/medits"
+//   },
+//   "timestamp": "2019-02-02T05:16:34.511Z",
+//   "eventId": "FEvi8Jf7ifB3cYfMXObvzPW9spg=",
+//   "authType": "ADMIN"
+// }
+	if (change.before.exists()) {
+		meditsAmount = change.after.val() - change.before.val() ;
+	}
+	console.log(`sendMeditsNotification:  meditsAmount: ${meditsAmount}`);
 
-    notificationFunctions.meditsNotifications(event, admin, (param) => {
-        console.log(`Param ${param}`);
-        console.log(`Total new medits is ${event.data.val()}`);
-        return 1;
-    });
-  });
- 
+	return notificationFunctions.meditsNotifications(meditsAmount, admin, context.params.user_id);
+});
+
 // **Score
 exports.sendScoreNotification = functions.database.ref('/users/{user_id}/health/score').onWrite((event) => {
-    const scoreAmount = event.data.val();
+	const scoreAmount = event.data.val();
 
-    // *** DISABLED FOR NOW *** 
+	// *** DISABLED FOR NOW *** 
 
-    // notificationFunctions.scoreNotifications(event, admin, (param) => {
-    //     console.log(`Param ${param}`);
-    //     console.log(`New Health Score is ${event.data.val()}`);
-    //     return 1;
-    // });
-    return 1;
+	// notificationFunctions.scoreNotifications(event, admin, (param) => {
+	//     console.log(`Param ${param}`);
+	//     console.log(`New Health Score is ${event.data.val()}`);
+	//     return 1;
+	// });
+	return 1;
+});
+
+// Calculate the Medit leaderboard
+exports.calculateLeaderboard = functions.database.ref('/users/{user_id}/wallet/medits').onWrite((event,context) => {
+
+    console.log(`Event: ${JSON.stringify(event, null, 2)}`);
+    console.log(`Context: ${JSON.stringify(context, null, 2)}`);
+
+    const userId = context.params.user_id;
+    let medit = 0;
+    let change = "same";
+    if (event.before.exists()) {
+        medit = event.after.val();
+        change = (event.after.val()>event.before.val()) ? "up" : "down";
+	}
+
+
+    leaderboardFunctions.calculateLeaderboard(userId, change, medit)
+    .then(results => {
+        console.log(`Result: ${JSON.stringify(results, null, 2)}`);
+        return;
+    })
+    .catch(error => {
+        console.log(error);
+    });
+
+	return 1;
+});
+
+// Calculate the Medit leaderboard
+exports.adminAPIGetLeaderboard = functions.https.onRequest((req, res) => {
+    console.log(`Req: ${JSON.stringify(req.body, null, 2)}`);
+
+    const number = (req.body.number) ? req.body.number : -1;
+    const type = (req.body.type) ? req.body.type : "";
+
+    adminAPIFunctions.adminAPIGetLeaderboard(number, type)
+    .then(results => {
+        console.log(`Leaderboard: ${JSON.stringify(results, null, 2)}`);
+        res.status(200).send(JSON.stringify(results, null, 2));
+        return;
+    })
+    .catch(error => {
+        console.log(error);
+        res.status(400).send(error);
+    });	
+});
+
+// Calculate the Medit leaderboard
+exports.adminAPIGetScoreTable = functions.https.onRequest((req, res) => {
+  console.log(`Req: ${JSON.stringify(req.body, null, 2)}`);
+
+  const number = (req.body.number) ? req.body.number : -1;
+  const type = (req.body.type) ? req.body.type : "";
+
+  adminAPIFunctions.adminAPIGetScoreTable(number, type)
+  .then(results => {
+      console.log(`Score Table: ${JSON.stringify(results, null, 2)}`);
+      res.status(200).send(JSON.stringify(results, null, 2));
+      return;
+  })
+  .catch(error => {
+      console.log(error);
+      res.status(400).send(error);
+  });	
+});
+
+exports.adminAPISetLeaderboard = functions.https.onRequest((req, res) => {
+  console.log(`Req: ${JSON.stringify(req.body, null, 2)}`);
+
+  adminAPIFunctions.adminAPISetLeaderboard(req)
+  .then(results => {
+      console.log(`Result: ${JSON.stringify(results, null, 2)}`);
+      res.status(200).send(JSON.stringify(results, null, 2));
+      return;
+  })
+  .catch(error => {
+      console.log(error);
+      res.status(400).send(error);
   });
+});
 
+exports.adminAPISetScoreTable = functions.https.onRequest((req, res) => {
+  console.log(`Req: ${JSON.stringify(req.body, null, 2)}`);
+
+  adminAPIFunctions.adminAPISetScoreTable(req)
+  .then(results => {
+      console.log(`Result: ${JSON.stringify(results, null, 2)}`);
+      res.status(200).send(JSON.stringify(results, null, 2));
+      return;
+  })
+  .catch(error => {
+      console.log(error);
+      res.status(400).send(error);
+  });
+});

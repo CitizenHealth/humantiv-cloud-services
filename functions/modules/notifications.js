@@ -1,17 +1,13 @@
+exports.meditsNotifications = function(meditsAmount, admin, user_id) {
 
-exports.meditsNotifications = function(event, admin) {
-
-    const userId = event.params.user_id;
-    const meditsAmount = event.data.val();
-
-     // If un-follow we exit the function.
-    if (meditsAmount < 0) {
-      return console.log('No medit minted');
-    }
-    console.log('We have a new medits minted:', meditsAmount, 'for user:', userId);
+    // If un-follow we exit the function.
+    // if (meditsAmount < 0) {
+    //   return console.log('No medit minted');
+    // }
+    console.log('We have a new medits minted:', meditsAmount, 'for user:', user_id);
   
     // Get the list of device notification tokens.
-    const getDeviceTokensPromise = admin.database().ref(`/users/${userId}/messaging/fcm`).once('value');
+    const getDeviceTokensPromise = admin.database().ref(`/users/${user_id}/messaging/fcm`).once('value');
     var tokensSnapshot;
     var tokens = [];
     return Promise.all([getDeviceTokensPromise])
@@ -23,8 +19,8 @@ exports.meditsNotifications = function(event, admin) {
       // Notification details.
       const payload = {
         notification: {
-          title: 'You just earned new Medit!',
-          body: `You have now ${meditsAmount} medit in your wallet.`,
+          title: 'New Medit!',
+          body: `You just ${(meditsAmount>0) ? `earned ${meditsAmount}`: `spent ${-meditsAmount}`} medit.`,
           icon: 'https://firebasestorage.googleapis.com/v0/b/health-score-6740b.appspot.com/o/notification%2Fmedits.png?alt=media&token=93860fa7-8921-4b5e-80f5-be056e2be873',
         },
       };
@@ -68,8 +64,8 @@ exports.scoreNotifications = function(event, admin) {
   
     // Get the list of device notification tokens.
     const getDeviceTokensPromise = admin.database().ref(`/users/${userId}/messaging/fcm`).once('value');
-    var tokensSnapshot;
-    var tokens = [];
+    let tokensSnapshot;
+    const tokens = [];
     return Promise.all([getDeviceTokensPromise])
     .then((results) => {
       tokensSnapshot = results[0];
