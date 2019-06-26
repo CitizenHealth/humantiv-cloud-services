@@ -2,9 +2,8 @@
 const INITIAL_MEDITS = 200;
 const INITIAL_MDX = 0;
 
-exports.giveInitialMedits = function(event, database, callback) {
-    const user = event.data; // The Firebase user.
-
+exports.giveInitialMedits = function(user, database, callback) {
+    console.log(`User: ${JSON.stringify(user, null, 2)}`);
     const id = user.uid; // The id of the user.
 
     // Write the 
@@ -15,31 +14,25 @@ exports.giveInitialMedits = function(event, database, callback) {
     })
     .then(() => {
         console.log("medit added successfully");
-        return 1;
-    })
-    .catch((error) => {
-        console.log(`medit error: ${error}`);
-        return 0;
-    });  
-    
-    // Write medits to the feed
-    const currentUnixTime = Math.floor(new Date() / 1000);
-    database.ref(`users/${id}/feed/stories/${currentUnixTime}`)
-    .set({
-        preposition: "",
-        time: currentUnixTime,
-        title: "You've earned",
-        type: "medits",
-        value: `${INITIAL_MEDITS} Medit`
+        // Write medits to the feed
+        const currentUnixTime = Math.floor(new Date() / 1000);
+        return database.ref(`users/${id}/feed/stories/${currentUnixTime}`)
+        .set({
+            preposition: "",
+            time: currentUnixTime,
+            title: "You've earned",
+            type: "medits",
+            value: `${INITIAL_MEDITS} Medit`
+        })
     })
     .then(() => {
         console.log("Added medit generation to the feed");
-        return 1;
+        return callback(null);
     })
     .catch((error) => {
-        console.log(`Feed generation: ${error}`);
-        return 0;
-    });  
+        console.log(`medit error: ${error}`);
+        return callback(error);
+    });   
     
     // Write medex to the feed
     // database.ref(`users/${id}/feed/stories/${currentUnixTime + 1}`)

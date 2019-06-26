@@ -7,9 +7,7 @@ const INITIAL_GOAL_NOTIFICATIONS = "feet";
 const INITIAL_VOTES_NOTIFICATIONS = "feet";
 const INITIAL_WALLET_NOTIFICATIONS = "feet";
 
-exports.initializeAccount = function(event, database, callback) {
-    const user = event.data; // The Firebase user.
-
+exports.initializeAccount = function(user, database, callback) {
     const id = user.uid; // The id of the user.
 
     // Write the 
@@ -24,10 +22,10 @@ exports.initializeAccount = function(event, database, callback) {
     })
     .then(() => {
         console.log("account initialized successfully");
-        return 1;
+        return callback(null);
     })
     .catch((error) => {
         console.log(`account initialization error: ${error}`);
-        return 0;
+        return callback(error);
     });   
 }
